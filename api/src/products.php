@@ -193,10 +193,10 @@ function ai_scan($c)
         $uploadId = insert('INSERT INTO ai_uploads (store_id, image_path) VALUES (?,?)', [$store['id'], $path]);
 
         try {
-            $text = ai_chat($system, [[
+            $text = claude($system, [[
                 'role'    => 'user',
                 'content' => [
-                    ['type' => 'image_url', 'image_url' => ['url' => 'data:' . $mimes[$ext] . ';base64,' . base64_encode(file_get_contents($dir . '/' . $fname))]],
+                    ['type' => 'image', 'source' => ['type' => 'base64', 'media_type' => $mimes[$ext], 'data' => base64_encode(file_get_contents($dir . '/' . $fname))]],
                     ['type' => 'text', 'text' => 'List the products in this photo with counts.'],
                 ],
             ]], 1200);

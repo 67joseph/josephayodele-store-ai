@@ -18,7 +18,7 @@ expenses · reports (revenue, gross/net profit, top products, payment modes) · 
 ## Deploy (cPanel / shared hosting)
 1. **Database**: create a MySQL DB + user in cPanel, import `api/schema.sql` into it (select the database first; the file has no CREATE DATABASE line).
 2. **API**: upload the `api/` folder to e.g. `public_html/api/`. Copy `config.local.sample.php` → `config.local.php` and set DB details,
-   a long random `app_secret`, and `openai_key` (needed for photo scan + AI chat). Make `api/uploads/` writable (755/775).
+   a long random `app_secret`, and `anthropic_key` (needed for photo scan + AI chat). Make `api/uploads/` writable (755/775).
 3. **Frontend**: set `NEXT_PUBLIC_API_URL` (default `/api` = same domain), run `cd web && npm run build`, upload the contents of `web/out/` to `public_html/`.
    The pre-built `out/` assumes the dev API URL — rebuild before deploying.
 4. Set `cors_origin` in config to your site URL if the API is on a different domain.

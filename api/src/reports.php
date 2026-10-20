@@ -142,7 +142,7 @@ function chat_send($c)
         . "Profit notes: gross_profit = revenue - cogs; net_profit = gross_profit - expenses. 'owed_to_me' = customers owe the shop; 'i_owe' = the shop owes suppliers.\n\n"
         . "STORE DATA:\n" . chat_context($store);
 
-    $reply = trim(ai_chat($system, $messages, 1500));
+    $reply = trim(claude($system, $messages, 1200));
     if ($reply === '') {
         $reply = "I couldn't come up with an answer. Please try rephrasing.";
     }
