@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-foreach (['auth', 'products', 'sales', 'reports'] as $mod) {
+foreach (['ai', 'auth', 'products', 'sales', 'reports'] as $mod) {
     require __DIR__ . '/src/' . $mod . '.php';
 }
 

@@ -1,5 +1,5 @@
 <?php
-// Core helpers: config, DB, HTTP I/O, auth tokens, Claude client.
+// Core helpers: config, DB, HTTP I/O, auth tokens, AI client lives in ai.php.
 
 class HttpError extends Exception
 {
@@ -219,51 +219,4 @@ function dispatch()
         return call_user_func($r[2], $ctx);
     }
     abort($pathMatched ? 405 : 404, $pathMatched ? 'Method not allowed' : 'Not found');
-}
-
-// ───────── Claude (Anthropic) client ─────────
-function claude($system, $messages, $maxTokens = 1500)
-{
-    $key = cfg('anthropic_key');
-    if (!$key) {
-        abort(503, 'AI is not configured yet. Add anthropic_key to api/config.local.php.');
-    }
-    $payload = [
-        'model'      => cfg('ai_model'),
-        'max_tokens' => $maxTokens,
-        'system'     => $system,
-        'messages'   => $messages,
-    ];
-    $ch = curl_init('https://api.anthropic.com/v1/messages');
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 90,
-        CURLOPT_HTTPHEADER     => [
-            'content-type: application/json',
-            'x-api-key: ' . $key,
-            'anthropic-version: 2023-06-01',
-        ],
-        CURLOPT_POSTFIELDS     => json_encode($payload),
-    ]);
-    $out = curl_exec($ch);
-    $err = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($out === false) {
-        abort(502, 'Could not reach the AI service: ' . $err);
-    }
-    $j = json_decode($out, true);
-    if ($code >= 400 || !is_array($j)) {
-        $msg = isset($j['error']['message']) ? $j['error']['message'] : 'AI request failed (' . $code . ')';
-        abort(502, $msg);
-    }
-    $text = '';
-    foreach ($j['content'] as $blk) {
-        if (isset($blk['type']) && $blk['type'] === 'text') {
-            $text .= $blk['text'];
-        }
-    }
-    return $text;
 }
