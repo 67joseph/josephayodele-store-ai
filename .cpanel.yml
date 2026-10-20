@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    # Target web root. For a subdomain, change to e.g. $HOME/store.yourdomain.com/
+    - export DEPLOYPATH=$HOME/public_html/
+    - /bin/mkdir -p $DEPLOYPATH/api/uploads
+    # Frontend (pre-built static site)
+    - /bin/cp -R web-dist/. $DEPLOYPATH
+    # API (config.local.php and uploads/ live only on the server, so they are never overwritten)
+    - /bin/cp -R api/. $DEPLOYPATH/api
