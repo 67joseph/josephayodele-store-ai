@@ -70,13 +70,17 @@ export default function WhatsAppPage() {
         </Card>
       )}
 
-      {status.configured && (
-        <Card className={`p-3.5 text-sm ${status.last_webhook_at ? 'border-emerald-100 bg-emerald-50/60 text-emerald-800' : 'border-slate-100 text-slate-500'}`}>
-          {status.last_webhook_at
-            ? <>Last message from WhatsApp reached the server: <b>{dateTime(status.last_webhook_at)}</b></>
-            : <>No message from WhatsApp has reached the server yet. If you’ve sent one, check Meta’s webhook setup (callback URL, verify token, and that <b>messages</b> is subscribed).</>}
-        </Card>
-      )}
+      {status.configured && (() => {
+        const ok = status.last_webhook_at && (!status.last_attempt_at || status.last_webhook_at >= status.last_attempt_at);
+        const rejected = status.last_attempt_at && !ok;
+        return (
+          <Card className={`p-3.5 text-sm ${ok ? 'border-emerald-100 bg-emerald-50/60 text-emerald-800' : rejected ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-100 text-slate-500'}`}>
+            {ok ? <>WhatsApp is reaching the server. Last message: <b>{dateTime(status.last_webhook_at)}</b></>
+              : rejected ? <><b>WhatsApp is reaching the server, but the messages are being rejected</b> (last try {dateTime(status.last_attempt_at)}). The App secret in <code className="rounded bg-amber-100 px-1">config.local.php</code> doesn’t match Meta’s. Copy it again from App settings → Basic → App secret.</>
+              : <>Nothing from WhatsApp has reached the server yet. Check Meta’s webhook setup: callback URL, verify token, <b>messages</b> subscribed, and that your phone is in the recipient list.</>}
+          </Card>
+        );
+      })()}
 
       <Card className="p-4">
         <div className="flex items-start gap-3">

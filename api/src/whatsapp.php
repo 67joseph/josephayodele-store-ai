@@ -727,7 +727,7 @@ function wa_handle_message($m)
         return;
     }
     if (mt_rand(1, 50) === 1) {
-        q("DELETE FROM whatsapp_inbox WHERE created_at < ? AND wamid <> '_last_webhook'", [date('Y-m-d H:i:s', time() - 3 * 86400)]);
+        q("DELETE FROM whatsapp_inbox WHERE created_at < ? AND wamid NOT LIKE '_last_%'", [date('Y-m-d H:i:s', time() - 3 * 86400)]);
     }
 
     $type = isset($m['type']) ? $m['type'] : '';
@@ -781,6 +781,7 @@ function wa_webhook_verify($c)
 function wa_webhook_receive($c)
 {
     $raw = file_get_contents('php://input');
+    q('REPLACE INTO whatsapp_inbox (wamid, wa_number, created_at) VALUES (?,?,?)', ['_last_attempt', '-', date('Y-m-d H:i:s')]);
     $secret = (string) cfg('wa_app_secret');
     if ($secret === '') {
         abort(503, 'WhatsApp is not configured (wa_app_secret missing)');
@@ -850,6 +851,7 @@ function wa_status($c)
         'configured'      => wa_ready() && cfg('wa_app_secret') && cfg('wa_verify_token'),
         'business_number' => $biz ?: null,
         'last_webhook_at' => val("SELECT created_at FROM whatsapp_inbox WHERE wamid = '_last_webhook'"),
+        'last_attempt_at' => val("SELECT created_at FROM whatsapp_inbox WHERE wamid = '_last_attempt'"),
         'links'           => rows('SELECT l.id, l.wa_number, l.created_at, u.name FROM whatsapp_links l JOIN users u ON u.id = l.user_id WHERE l.store_id = ? ORDER BY l.id', [$c['store']['id']]),
     ]);
 }
