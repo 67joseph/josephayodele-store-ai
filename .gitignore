@@ -1,0 +1,5 @@
+node_modules
+.next
+api/config.local.php
+api/uploads/*
+!api/uploads/.htaccess
