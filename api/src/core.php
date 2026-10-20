@@ -1,5 +1,5 @@
 <?php
-// Core helpers: config, DB, HTTP I/O, auth tokens, Claude client.
+// Core helpers: config, DB, HTTP I/O, auth tokens, AI client.
 
 class HttpError extends Exception
 {
@@ -221,29 +221,25 @@ function dispatch()
     abort($pathMatched ? 405 : 404, $pathMatched ? 'Method not allowed' : 'Not found');
 }
 
-// ───────── Claude (Anthropic) client ─────────
-function claude($system, $messages, $maxTokens = 1500)
+// ───────── AI client (OpenAI Chat Completions; any OpenAI-compatible endpoint works) ─────────
+function ai_chat($system, $messages, $maxTokens = 1500)
 {
-    $key = cfg('anthropic_key');
+    $key = cfg('openai_key');
     if (!$key) {
-        abort(503, 'AI is not configured yet. Add anthropic_key to api/config.local.php.');
+        abort(503, 'AI is not configured yet. Add openai_key to api/config.local.php.');
     }
+    array_unshift($messages, ['role' => 'system', 'content' => $system]);
     $payload = [
-        'model'      => cfg('ai_model'),
-        'max_tokens' => $maxTokens,
-        'system'     => $system,
-        'messages'   => $messages,
+        'model'                 => cfg('ai_model'),
+        'messages'              => $messages,
+        'max_completion_tokens' => $maxTokens,
     ];
-    $ch = curl_init('https://api.anthropic.com/v1/messages');
+    $ch = curl_init(rtrim(cfg('ai_base_url'), '/') . '/chat/completions');
     curl_setopt_array($ch, [
         CURLOPT_POST           => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 90,
-        CURLOPT_HTTPHEADER     => [
-            'content-type: application/json',
-            'x-api-key: ' . $key,
-            'anthropic-version: 2023-06-01',
-        ],
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json', 'Authorization: Bearer ' . $key],
         CURLOPT_POSTFIELDS     => json_encode($payload),
     ]);
     $out = curl_exec($ch);
@@ -259,11 +255,5 @@ function claude($system, $messages, $maxTokens = 1500)
         $msg = isset($j['error']['message']) ? $j['error']['message'] : 'AI request failed (' . $code . ')';
         abort(502, $msg);
     }
-    $text = '';
-    foreach ($j['content'] as $blk) {
-        if (isset($blk['type']) && $blk['type'] === 'text') {
-            $text .= $blk['text'];
-        }
-    }
-    return $text;
+    return isset($j['choices'][0]['message']['content']) ? (string) $j['choices'][0]['message']['content'] : '';
 }

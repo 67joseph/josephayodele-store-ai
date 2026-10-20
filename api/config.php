@@ -7,8 +7,10 @@ $cfg = [
     'db_user'       => getenv('DB_USER') ?: 'root',
     'db_pass'       => getenv('DB_PASS') ?: '',
     'app_secret'    => getenv('APP_SECRET') ?: 'change-me-to-a-long-random-string',
-    'anthropic_key' => getenv('ANTHROPIC_API_KEY') ?: '',
-    'ai_model'      => getenv('AI_MODEL') ?: 'claude-sonnet-5-5',
+    'openai_key'    => getenv('OPENAI_API_KEY') ?: '',
+    'ai_base_url'   => getenv('AI_BASE_URL') ?: 'https://api.openai.com/v1',
+    // Must support image input. Check your available IDs at https://platform.openai.com/docs/models
+    'ai_model'      => getenv('AI_MODEL') ?: 'gpt-4.1-mini',
     'timezone'      => getenv('APP_TIMEZONE') ?: 'Africa/Lagos',
     'cors_origin'   => getenv('CORS_ORIGIN') ?: '*',
     'debug'         => false,
