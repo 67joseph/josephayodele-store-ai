@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart3, Boxes, HandCoins, Home, Menu, Receipt, ShoppingCart, Sparkles, LogOut, Plus, Settings, Store } from 'lucide-react';
+import { BarChart3, Boxes, HandCoins, Home, Menu, MessageCircle, Receipt, ShoppingCart, Sparkles, LogOut, Plus, Settings, Store } from 'lucide-react';
 import { api } from '@/lib/api';
 import { CURRENCY_OPTIONS } from '@/lib/format';
 import { useAuth } from '@/components/auth';
@@ -18,6 +18,7 @@ const NAV = [
 const EXTRA = [
   { href: '/expenses/', label: 'Expenses', icon: Receipt },
   { href: '/assistant/', label: 'Ask AI', icon: Sparkles },
+  { href: '/whatsapp/', label: 'WhatsApp', icon: MessageCircle },
 ];
 
 const active = (path, href) => (href === '/' ? path === '/' : path.startsWith(href.replace(/\/$/, '')));

@@ -115,11 +115,9 @@ function chat_context($store)
     return json_encode($ctx, JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
 }
 
-function chat_send($c)
+// Ask the analyst. $sessionId 0 = start a new conversation. Returns [sessionId, reply].
+function chat_answer($store, $sessionId, $msg)
 {
-    $store = $c['store'];
-    $msg = str_in('message', 2000, true);
-    $sessionId = (int) (input()['session_id'] ?? 0);
     if ($sessionId) {
         if (!val('SELECT id FROM chat_sessions WHERE id = ? AND store_id = ?', [$sessionId, $store['id']])) {
             abort(404, 'Conversation not found');
@@ -148,6 +146,12 @@ function chat_send($c)
     }
     insert('INSERT INTO chat_messages (session_id, role, content) VALUES (?,?,?)', [$sessionId, 'user', $msg]);
     insert('INSERT INTO chat_messages (session_id, role, content) VALUES (?,?,?)', [$sessionId, 'assistant', $reply]);
+    return [$sessionId, $reply];
+}
+
+function chat_send($c)
+{
+    list($sessionId, $reply) = chat_answer($c['store'], (int) (isset(input()['session_id']) ? input()['session_id'] : 0), str_in('message', 2000, true));
     respond(['session_id' => $sessionId, 'reply' => $reply]);
 }
 

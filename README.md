@@ -32,3 +32,28 @@ expenses · reports (revenue, gross/net profit, top products, payment modes) · 
 `web-dist/` is the pre-built frontend (built for the `/website_c9b9f857` subfolder). After changing anything in `web/`, rebuild and commit it:
 `cd web && NEXT_PUBLIC_BASE_PATH=/website_c9b9f857 NEXT_PUBLIC_API_URL=/website_c9b9f857/api npm run build && cd .. && rm -rf web-dist && cp -r web/out web-dist`
 `.cpanel.yml` copies `web-dist/` → `public_html/` and `api/` → `public_html/api/` on every deploy.
+
+## WhatsApp bot
+Linked users run the store from WhatsApp: record sales (single or multiple items, any payment mode, part-payment/credit),
+restock, add products/change prices, log expenses, record debts and payments, check stock, get reports, ask the AI analyst, and
+**send a photo of stock** to add it. Anything that saves data is summarised first and needs a **YES** reply.
+Shortcuts that need no AI: `TODAY`, `STOCK`, `DEBTS`, `HELP`. The bot uses the same AI provider as the web app.
+
+**Setup (Meta WhatsApp Cloud API)**
+1. Re-import `api/schema.sql` (adds the `whatsapp_*` tables; safe to re-run).
+2. At [developers.facebook.com](https://developers.facebook.com) create an app (type *Business*) → add the **WhatsApp** product.
+   Note the **Phone number ID**, create a **permanent access token** (System User in Business Settings) and copy the **App secret** (App settings → Basic).
+3. Add to `api/config.local.php`:
+   ```php
+   'wa_token'           => 'EAAG...',            // permanent token
+   'wa_phone_number_id' => '1234567890',
+   'wa_verify_token'    => 'any-secret-you-invent',
+   'wa_app_secret'      => '...',
+   'wa_business_number' => '2348012345678',      // the number users chat with (digits only)
+   ```
+4. In Meta → WhatsApp → Configuration → Webhook: callback URL `https://YOUR-DOMAIN/website_c9b9f857/api/whatsapp/webhook`,
+   verify token = `wa_verify_token`, then subscribe to the **messages** field. **Meta only accepts https**, so enable SSL first.
+5. In the web app open **WhatsApp** → *Connect a number*, then send the shown `LINK 123456` from your phone.
+
+Notes: with Meta's free test number you can only message numbers you've added as test recipients; use a real number for production.
+`wa_rate_per_min` (default 40) caps messages per number. Everyone linked to a store has full access to it.

@@ -174,6 +174,44 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- ───────────── WhatsApp ─────────────
+-- A WhatsApp number linked to a store (several staff numbers can share one store)
+CREATE TABLE IF NOT EXISTS whatsapp_links (
+  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         BIGINT UNSIGNED NOT NULL,
+  store_id        BIGINT UNSIGNED NOT NULL,
+  wa_number       VARCHAR(20) NOT NULL UNIQUE,
+  chat_session_id BIGINT UNSIGNED NULL,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- One-time codes the user sends to the bot ("LINK 123456") to connect their number
+CREATE TABLE IF NOT EXISTS whatsapp_link_codes (
+  code        CHAR(6) PRIMARY KEY,
+  user_id     BIGINT UNSIGNED NOT NULL,
+  store_id    BIGINT UNSIGNED NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Action waiting for the user's YES / NO
+CREATE TABLE IF NOT EXISTS whatsapp_pending (
+  wa_number   VARCHAR(20) PRIMARY KEY,
+  payload     TEXT NOT NULL,
+  expires_at  DATETIME NOT NULL
+) ENGINE=InnoDB;
+
+-- Processed inbound message ids (WhatsApp retries deliveries) + simple rate limiting
+CREATE TABLE IF NOT EXISTS whatsapp_inbox (
+  wamid       VARCHAR(120) PRIMARY KEY,
+  wa_number   VARCHAR(20) NOT NULL,
+  created_at  DATETIME NOT NULL,
+  KEY idx_number_time (wa_number, created_at)
+) ENGINE=InnoDB;
+
 -- ───────────── Seed store types ─────────────
 INSERT IGNORE INTO store_types (name) VALUES
  ('Provisions / Grocery'),('Supermarket'),('Pharmacy'),('Fashion & Clothing'),
