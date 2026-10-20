@@ -1,7 +1,7 @@
 -- Store-AI schema (MySQL 5.7+/8 or MariaDB 10.3+)
-CREATE DATABASE IF NOT EXISTS store_ai
-  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE store_ai;
+-- Import into an EXISTING, SELECTED database (phpMyAdmin: select your DB, then Import / SQL tab).
+-- Safe to re-run: tables use IF NOT EXISTS and the category seed uses INSERT IGNORE.
+-- Local dev only: CREATE DATABASE store_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; USE store_ai;
 
 -- ───────────── Users & Stores ─────────────
 CREATE TABLE IF NOT EXISTS users (
