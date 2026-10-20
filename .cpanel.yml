@@ -1,8 +1,8 @@
 ---
 deployment:
   tasks:
-    # Target web root. For a subdomain, change to e.g. $HOME/store.yourdomain.com/
-    - export DEPLOYPATH=$HOME/public_html/
+    # Site folder on Bluehost (served at /website_c9b9f857)
+    - export DEPLOYPATH=$HOME/public_html/website_c9b9f857/
     - /bin/mkdir -p $DEPLOYPATH/api/uploads
     # Frontend (pre-built static site)
     - /bin/cp -R web-dist/. $DEPLOYPATH

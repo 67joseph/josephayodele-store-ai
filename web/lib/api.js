@@ -1,3 +1,4 @@
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
 
 const ls = {
@@ -40,7 +41,7 @@ export async function api(path, { method = 'GET', body, form } = {}) {
   if (!res.ok) {
     if (res.status === 401 && t && typeof window !== 'undefined') {
       session.clear();
-      window.location.href = '/login/';
+      window.location.href = BASE_PATH + '/login/';
     }
     throw new Error((data && data.error) || `Request failed (${res.status})`);
   }

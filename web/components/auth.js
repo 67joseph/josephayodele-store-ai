@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { api, session } from '@/lib/api';
+import { api, BASE_PATH, session } from '@/lib/api';
 import { makeMoney } from '@/lib/format';
 
 const Ctx = createContext(null);
@@ -36,12 +36,12 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => {
     session.clear();
-    window.location.href = '/login/';
+    window.location.href = BASE_PATH + '/login/';
   }, []);
 
   const switchStore = useCallback((id) => {
     session.setStoreId(id);
-    window.location.href = '/';
+    window.location.href = BASE_PATH + '/';
   }, []);
 
   const store = stores.find((s) => s.id === storeId) || null;

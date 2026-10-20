@@ -29,6 +29,6 @@ expenses · reports (revenue, gross/net profit, top products, payment modes) · 
 - Photos are resized in the browser (max 1600px) before upload; AI model is configurable via `ai_model`.
 
 ## Deploying to Bluehost from GitHub (cPanel Git)
-`web-dist/` is the pre-built frontend (built with `NEXT_PUBLIC_API_URL=/api`). After changing anything in `web/`, rebuild and commit it:
-`cd web && NEXT_PUBLIC_API_URL=/api npm run build && cd .. && rm -rf web-dist && cp -r web/out web-dist`
+`web-dist/` is the pre-built frontend (built for the `/website_c9b9f857` subfolder). After changing anything in `web/`, rebuild and commit it:
+`cd web && NEXT_PUBLIC_BASE_PATH=/website_c9b9f857 NEXT_PUBLIC_API_URL=/website_c9b9f857/api npm run build && cd .. && rm -rf web-dist && cp -r web/out web-dist`
 `.cpanel.yml` copies `web-dist/` → `public_html/` and `api/` → `public_html/api/` on every deploy.
