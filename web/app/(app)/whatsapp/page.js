@@ -70,6 +70,14 @@ export default function WhatsAppPage() {
         </Card>
       )}
 
+      {status.configured && (
+        <Card className={`p-3.5 text-sm ${status.last_webhook_at ? 'border-emerald-100 bg-emerald-50/60 text-emerald-800' : 'border-slate-100 text-slate-500'}`}>
+          {status.last_webhook_at
+            ? <>Last message from WhatsApp reached the server: <b>{dateTime(status.last_webhook_at)}</b></>
+            : <>No message from WhatsApp has reached the server yet. If you’ve sent one, check Meta’s webhook setup (callback URL, verify token, and that <b>messages</b> is subscribed).</>}
+        </Card>
+      )}
+
       <Card className="p-4">
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><MessageCircle className="h-6 w-6" /></span>

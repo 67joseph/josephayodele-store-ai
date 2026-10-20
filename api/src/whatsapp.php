@@ -727,7 +727,7 @@ function wa_handle_message($m)
         return;
     }
     if (mt_rand(1, 50) === 1) {
-        q('DELETE FROM whatsapp_inbox WHERE created_at < ?', [date('Y-m-d H:i:s', time() - 3 * 86400)]);
+        q("DELETE FROM whatsapp_inbox WHERE created_at < ? AND wamid <> '_last_webhook'", [date('Y-m-d H:i:s', time() - 3 * 86400)]);
     }
 
     $type = isset($m['type']) ? $m['type'] : '';
@@ -787,6 +787,7 @@ function wa_webhook_receive($c)
     }
     $sig = header_in('X-Hub-Signature-256');
     if (!hash_equals('sha256=' . hash_hmac('sha256', $raw, $secret), $sig)) {
+        error_log('[store-ai wa] webhook rejected: signature mismatch (is wa_app_secret the App secret from App settings > Basic?)');
         abort(403, 'Bad signature');
     }
     $payload = json_decode($raw, true);
@@ -809,6 +810,7 @@ function wa_webhook_receive($c)
     ignore_user_abort(true);
     set_time_limit(120);
 
+    q('REPLACE INTO whatsapp_inbox (wamid, wa_number, created_at) VALUES (?,?,?)', ['_last_webhook', '-', date('Y-m-d H:i:s')]);
     if (is_array($payload)) {
         foreach (isset($payload['entry']) ? (array) $payload['entry'] : [] as $e) {
             foreach (isset($e['changes']) ? (array) $e['changes'] : [] as $ch) {
@@ -847,6 +849,7 @@ function wa_status($c)
     respond([
         'configured'      => wa_ready() && cfg('wa_app_secret') && cfg('wa_verify_token'),
         'business_number' => $biz ?: null,
+        'last_webhook_at' => val("SELECT created_at FROM whatsapp_inbox WHERE wamid = '_last_webhook'"),
         'links'           => rows('SELECT l.id, l.wa_number, l.created_at, u.name FROM whatsapp_links l JOIN users u ON u.id = l.user_id WHERE l.store_id = ? ORDER BY l.id', [$c['store']['id']]),
     ]);
 }
